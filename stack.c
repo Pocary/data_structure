@@ -1,6 +1,3 @@
-// initStack(capacity) : 스택 초기화, push(stack, void* data) : 데이터 주소 넣기
-// void* pop(stack) : 주소값 반환, isEmpty(), isFull() 보조함수
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -38,17 +35,17 @@ Stack* initStack(int capacity)
     return s;
 }
 
-void printStackElement(StackElement *s)
+void printStackElement(StackElement s)
 {
-    switch (s->type) {
+    switch (s.type) {
         case 0:
-            printf("data: %d\n", *(int*)s->data);
+            printf("data: %d\n", *(int*)s.data);
             break;
         case 1:
-            printf("data: %f\n", *(double*)s->data);
+            printf("data: %f\n", *(double*)s.data);
             break;
         case 2:
-            printf("data: %s\n", *(char**)s->data);
+            printf("data: %s\n", (char*)s.data);
             break;
         default:
             printf("data type error!\n");
@@ -76,16 +73,26 @@ int push(Stack *s, void *data, DataType type, bool owns_memory)
     return 0;
 }
 
-StackElement * pop(Stack *s)
+StackElement pop(Stack *s)
 {
-    if (isEmpty(s)) { printf("It's empty Stack.\n"); return NULL; }
-    return &s->data[s->top--];
+    if (isEmpty(s)) {
+       printf("It's empty Stack.\n");
+       StackElement empty = {NULL, TYPE_UNKNOWN, false};
+       return empty;
+    }
+    StackElement forReturn = s->data[s->top];
+    if (s->data[s->top].owns_memory) { free(s->data[s->top].data); }
+    return forReturn;
 }
 
-StackElement * peek(Stack* s)
+StackElement peek(Stack* s)
 {
-    if (isEmpty(s)) { printf("It's empty Stack.\n"); return NULL; }
-    return &s->data[s->top];
+    if (isEmpty(s)) {
+        printf("It's empty Stack.\n");
+        StackElement empty = {NULL, TYPE_UNKNOWN, false};
+        return empty;
+    }
+    return s->data[s->top];
 }
 
 // 개발 디버그용 스택 확인
@@ -94,7 +101,7 @@ void printAllStack(Stack* s)
     printf("=== Print All Stack ===\n");
     for (int i = 0; i <= s->top; i++) {
         printf("%d. ", i);
-        printStackElement(&(s->data[i]));
+        printStackElement((s->data[i]));
     }
     printf("=== until here ===\n");
 }
